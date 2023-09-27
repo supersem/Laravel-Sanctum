@@ -18,7 +18,7 @@ class UserSubscriptionController extends Controller
         return SubscriptionResource::collection($subscriptions);
     }
 
-    public function chooseSubscription(Request $request, $subscriptionId)
+    public function chooseSubscription( $subscriptionId)
     {
         $user = Auth::user();
         $subscription = Subscription::findOrFail($subscriptionId);
@@ -36,6 +36,7 @@ class UserSubscriptionController extends Controller
         $user->subscription_id = $subscription->id;
         $user->balance -= $subscription->price;
         $user->subscription_active_until = now()->addMonths(1);
+        $user->publications_left = $subscription->available_publications;
         $user->save();
 
         return response()->json([$user, 'message' => 'Subscription chosen successfully'], 200);

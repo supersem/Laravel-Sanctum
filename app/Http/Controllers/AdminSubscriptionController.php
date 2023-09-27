@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubscriptionStoreRequest;
+use App\Http\Requests\SubscriptionUpdateRequest;
 use App\Http\Resources\SubscriptionResource;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
@@ -23,42 +25,20 @@ class AdminSubscriptionController extends Controller
         return new SubscriptionResource($subscription);
     }
 
-    public function store(Request $request)
+    public function store(SubscriptionStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'available_publications' => 'required|integer',
-            'active' => 'required|boolean',
-        ]);
-
-        $subscription = new Subscription();
-        $subscription->name = $request->name;
-        $subscription->price = $request->price;
-        $subscription->available_publications = $request->available_publications;
-        $subscription->active = $request->active;
+        $validated = $request->validated();
+        $subscription = new Subscription($validated);
         $subscription->save();
 
         return new SubscriptionResource($subscription);
     }
 
-    public function update(Request $request, $id)
+    public function update(SubscriptionUpdateRequest $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'sometimes|string|max:255',
-            'price' => 'sometimes|numeric',
-            'available_publications' => 'sometimes|integer',
-            'active' => 'sometimes|boolean',
-        ]);
-
+        $validated = $request->validated();
         $subscription = Subscription::findOrFail($id);
-        $subscription->fill($request->only([
-            'name',
-            'price',
-            'available_publications',
-            'active',
-        ]));
-        $subscription->save();
+        $subscription->update($validated);
 
         return new SubscriptionResource($subscription);
     }
@@ -68,6 +48,6 @@ class AdminSubscriptionController extends Controller
         $subscription = Subscription::findOrFail($id);
         $subscription->delete();
 
-        return response()->noContent();
+        return response()->json(['message' => 'Subscription has deleted successfully']);
     }
 }

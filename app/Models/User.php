@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'balance',
+        'subscription_id',
         'subscription_active_until',
         'publications_left',
     ];
@@ -55,6 +56,11 @@ class User extends Authenticatable
 
     public function subscription()
     {
-        return $this->belongsTo(Subscription::class);
+        return $this->belongsTo(Subscription::class, 'subscription_id');
+    }
+
+    public function publications()
+    {
+        return $this->hasMany(Publication::class, 'user_id');
     }
 }
